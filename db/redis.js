@@ -22,6 +22,12 @@ var set = (key, value) => {
   })
 };
 
+var decr = (key) => {
+  return new Promise((resolve, reject) => {
+    client.decr(key, promiser(resolve, reject));
+  })
+};
+
 var incr = (key) => {
   return new Promise((resolve, reject) => {
     client.incr(key, promiser(resolve, reject));
@@ -72,6 +78,7 @@ var lrem = (key, value) => {
 
 module.exports.get = get;
 module.exports.set = set;
+module.exports.decr = decr;
 module.exports.incr = incr;
 module.exports.hget = hget;
 module.exports.hset = hset;
