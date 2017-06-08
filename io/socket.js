@@ -27,9 +27,28 @@ module.exports = (io) => {
 
       socket.on(EVENTS.ON.PLAYER, data => socket.to(room).emit(EVENTS.ON.PLAYER, data))
 
-      io.to(room).emit(EVENTS.EMIT.GAME,{
-        type: EVENTS.EMIT.TYPE.START
-      })
+      io.in(room).clients(function (err, clients) {
+
+        if(Math.ceil(Math.round(Math.random()))){
+          io.to(clients[0]).emit(EVENTS.EMIT.GAME, {
+            type: EVENTS.EMIT.TYPE.START,
+            turn: true 
+          });
+          io.to(clients[1]).emit(EVENTS.EMIT.GAME, {
+            type: EVENTS.EMIT.TYPE.START,
+            turn: false 
+          });
+        }else{
+          io.to(clients[0]).emit(EVENTS.EMIT.GAME, {
+            type: EVENTS.EMIT.TYPE.START,
+            turn: true 
+          });
+          io.to(clients[1]).emit(EVENTS.EMIT.GAME, {
+            type: EVENTS.EMIT.TYPE.START,
+            turn: false 
+          });
+        }
+      });
 
       socket.removeListener(EVENTS.DISCONNECT, updatePlayersOnline)
       socket.on(EVENTS.DISCONNECT, onDisconnect(room))
@@ -50,9 +69,9 @@ module.exports = (io) => {
         });
 
         db.redis.lpush(db.keys.WAITING_ROOM, room)
-          .then( data => {
+          // .then( data => {
 
-          }).catch( err => console.log(err))
+          // }).catch( err => console.log(err))
           
         socket.on(EVENTS.ON.PLAYER, data =>  socket.to(room).emit(EVENTS.ON.PLAYER, data))
         socket.removeListener(EVENTS.DISCONNECT, updatePlayersOnline)
@@ -72,7 +91,7 @@ module.exports = (io) => {
 
         if(clients.length){
 
-          db.redis.lpush(db.keys.db.keys.WAITING_ROOM,room);
+          db.redis.lpush(db.keys.WAITING_ROOM,room);
 
           io.to(room).emit(EVENTS.EMIT.GAME, { 
             type: EVENTS.EMIT.TYPE.WAIT
@@ -101,15 +120,15 @@ module.exports = (io) => {
     
     updatePlayersOnline()
         
-    socket.on(EVENTS.ON.STARTING, data => {
+    db.redis.lpop(db.keys.WAITING_ROOM)
+      .then( room => {
+        room ? joinExistingRoom(room, socket) : createsAndEnterRoom(socket)
+      }).catch(logErr)
+    // socket.on(EVENTS.ON.STARTING, data => {
 
-      socket.nickname = data.name
+    //   socket.nickname = data.name
       
-      db.redis.lpop(db.keys.WAITING_ROOM)
-        .then( room => {
-          room ? joinExistingRoom(room, socket) : createsAndEnterRoom(socket)
-        }).catch(logErr)
 
-    })
+    // })
   }
 }
