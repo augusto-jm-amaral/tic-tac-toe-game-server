@@ -43,11 +43,11 @@ module.exports = (io) => {
         }else{
           io.to(clients[0]).emit(EVENTS.EMIT.GAME, {
             type: EVENTS.EMIT.TYPE.START,
-            turn: true 
+            turn: false 
           });
           io.to(clients[1]).emit(EVENTS.EMIT.GAME, {
             type: EVENTS.EMIT.TYPE.START,
-            turn: false 
+            turn: true 
           });
         }
       });
