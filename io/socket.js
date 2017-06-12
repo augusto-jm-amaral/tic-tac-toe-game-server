@@ -29,8 +29,6 @@ module.exports = (io) => {
 
       io.in(room).clients(function (err, clients) {
 
-        // console.log(clients);
-
         if(Math.ceil(Math.round(Math.random()))){
           io.to(clients[0]).emit(EVENTS.EMIT.GAME, {
             type: EVENTS.EMIT.TYPE.START,
