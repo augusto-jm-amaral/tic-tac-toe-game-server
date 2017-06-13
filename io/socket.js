@@ -23,6 +23,8 @@ module.exports = (io) => {
 
   var joinExistingRoom = (room, socket) => {
       
+    console.log('joinExistingRoom');
+
     socket.join(room, () => {
 
       socket.on(EVENTS.ON.PLAYER, data => socket.to(room).emit(EVENTS.ON.PLAYER, data))
@@ -57,6 +59,8 @@ module.exports = (io) => {
   }
 
   var createsAndEnterRoom = (socket) => {
+
+    console.log('createsAndEnterRoom');
 
     db.redis.incr(db.keys.ROOM_COUNTER).then(val => {
 
@@ -120,15 +124,18 @@ module.exports = (io) => {
     
     updatePlayersOnline()
         
-    db.redis.lpop(db.keys.WAITING_ROOM)
-      .then( room => {
-        room ? joinExistingRoom(room, socket) : createsAndEnterRoom(socket)
-      }).catch(logErr)
-    // socket.on(EVENTS.ON.STARTING, data => {
+    console.log('Socket connect!');
+    
+    socket.on(EVENTS.ON.STARTING, data => {
 
-    //   socket.nickname = data.name
+      socket.nickname = data.name
+
       
+      db.redis.lpop(db.keys.WAITING_ROOM)
+        .then( room => {
+          room ? joinExistingRoom(room, socket) : createsAndEnterRoom(socket)
+        }).catch(logErr)
 
-    // })
+    })
   }
 }
